@@ -1,0 +1,37 @@
+# First install module community.docker
+# ansible-galaxy collection install community.docker
+
+---
+- hosts: localhost
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Create container db
+      community.docker.docker_container:
+        name: db
+        state: started
+        image: mysql:latest
+        ports:
+          - "3306:3306"
+        env:
+          MYSQL_ROOT_PASSWORD: "11111"
+          MYSQL_DATABASE: "problemsetters"
+          MYSQL_USER: "problemsetter"
+          MYSQL_PASSWORD: "11111"
+
+    - name: Create container web
+      community.docker.docker_container:
+        name: web
+        state: started
+        image: problemsetters/801133-ansible
+        pull: true
+        links:
+          - "db:db"
+        ports:
+          - "8000:80"
+        env:
+          MYSQL_HOSTNAME: "db"
+          MYSQL_ROOT_USER: "problemsetter"
+          MYSQL_ROOT_PASSWORD: "11111"
+          MYSQL_DATABASE: "problemsetters"
